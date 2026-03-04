@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Trading Coach — NQ & Gold</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap');
+:root{
+  --bg:#060a0f;--s1:#0a1018;--s2:#0f1825;--b1:#182433;--b2:#1e2f42;
+  --cyan:#00e5ff;--gold:#f5c518;--green:#00ff88;--red:#ff2d55;
+  --text:#c8e0ee;--dim:#3a5568;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
+
+/* TOP BAR */
+.bar{height:48px;background:var(--s1);border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
+  color:var(--cyan);text-shadow:0 0 18px rgba(0,229,255,.45);}
+.logo span{color:var(--gold);}
+.pills{display:flex;gap:12px;}
+.pill{display:flex;align-items:center;gap:5px;font-size:8px;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--dim);}
+.dot.on{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
+.dot.rec{background:var(--red);box-shadow:0 0 6px var(--red);animation:blink .7s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* MAIN */
+.main{display:grid;grid-template-columns:1fr 320px;flex:1;overflow:hidden;}
+
+/* SCREEN */
+.screen{display:flex;flex-direction:column;border-right:1px solid var(--b1);}
+.sv{flex:1;background:#020507;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.sv::before,.sv::after{content:'';position:absolute;width:24px;height:24px;border-color:var(--b2);border-style:solid;z-index:2;pointer-events:none;}
+.sv::before{top:10px;left:10px;border-width:2px 0 0 2px;}
+.sv::after{bottom:10px;right:10px;border-width:0 2px 2px 0;}
+.idle{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:32px;opacity:.4;}
+.idle-ico{font-size:52px;}
+.idle-t{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--dim);}
+.idle-d{font-size:10px;color:var(--dim);line-height:1.8;}
+#vid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;z-index:1;}
+.scanline{position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:0;z-index:3;pointer-events:none;}
+.scanline.go{animation:scan 3.5s linear infinite;}
+@keyframes scan{0%{top:0;opacity:0}5%{opacity:.5}95%{opacity:.5}100%{top:100%;opacity:0}}
+
+/* CONTROLS */
+.ctrl{display:flex;align-items:center;gap:7px;padding:9px 14px;
+  background:var(--s1);border-top:1px solid var(--b1);flex-shrink:0;}
+.btn{display:flex;align-items:center;gap:5px;padding:7px 13px;
+  background:transparent;border:1px solid var(--b2);border-radius:3px;
+  color:var(--text);font-family:'Space Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.06);}
+.btn.go{background:var(--cyan);border-color:var(--cyan);color:#000;font-weight:700;box-shadow:0 0 18px rgba(0,229,255,.3);}
+.btn.go:hover:not(:disabled){background:#33eeff;color:#000;}
+.btn.stop{border-color:var(--red);color:var(--red);}
+.btn.stop:hover:not(:disabled){background:rgba(255,45,85,.08);}
+.btn.auto-on{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,.07);}
+.btn:disabled{opacity:.28;cursor:not-allowed;}
+.sp{flex:1;}
+.atimer{font-size:9px;color:var(--gold);display:none;letter-spacing:1px;}
+.atimer.show{display:block;}
+
+/* SIDEBAR */
+.side{display:flex;flex-direction:column;background:var(--s1);overflow:hidden;}
+.side-hd{padding:10px 14px;border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.side-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--cyan);}
+.side-acts{display:flex;gap:7px;align-items:center;}
+.vmbtn{background:rgba(0,229,255,.06);border:1px solid var(--b2);border-radius:3px;
+  color:var(--dim);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;
+  padding:3px 8px;letter-spacing:1px;transition:all .15s;}
+.vmbtn.on{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.06);}
+.clrbtn{background:none;border:none;color:var(--dim);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;}
+.clrbtn:hover{color:var(--text);}
+
+/* API KEY SECTION */
+.apibox{padding:9px 12px;border-bottom:1px solid var(--b1);background:rgba(245,197,24,.04);flex-shrink:0;}
+.api-label{font-size:7px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;}
+.api-row{display:flex;gap:5px;}
+.api-in{flex:1;padding:6px 9px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;
+  color:var(--text);font-family:'Space Mono',monospace;font-size:9px;outline:none;transition:border-color .15s;}
+.api-in:focus{border-color:var(--gold);}
+.api-in::placeholder{color:var(--dim);}
+.api-ok{padding:6px 12px;background:var(--gold);border:none;border-radius:3px;
+  color:#000;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;cursor:pointer;}
+.api-hint{font-size:7px;color:var(--dim);margin-top:4px;}
+
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;
+  scrollbar-width:thin;scrollbar-color:var(--b2) transparent;}
+.msg{display:flex;flex-direction:column;gap:3px;animation:min .22s ease;}
+@keyframes min{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg-lbl{font-size:7px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding:0 2px;}
+.msg.ai .msg-lbl{color:var(--cyan);}
+.msg.usr{align-items:flex-end;}
+.msg.usr .msg-lbl{color:var(--gold);}
+.bubble{padding:8px 11px;border-radius:3px;font-size:10px;line-height:1.65;max-width:96%;}
+.msg.ai .bubble{background:var(--s2);border:1px solid var(--b1);border-left:2px solid var(--cyan);}
+.msg.usr .bubble{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.18);}
+.msg.ai .bubble b{color:var(--cyan);}
+.up{color:var(--green);font-weight:700;}
+.dn{color:var(--red);font-weight:700;}
+
+/* TYPING */
+.typing{display:none;align-items:center;gap:4px;padding:8px 11px;
+  background:var(--s2);border:1px solid var(--b1);border-left:2px solid var(--cyan);
+  border-radius:3px;width:fit-content;}
+.typing.show{display:flex;}
+.td{width:4px;height:4px;border-radius:50%;background:var(--cyan);animation:td 1.2s infinite;}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{opacity:.2;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+/* VOICE */
+.vsec{padding:10px 12px;border-top:1px solid var(--b1);flex-shrink:0;}
+.mic{width:100%;padding:13px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;
+  color:var(--text);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:9px;transition:all .2s;}
+.mic:hover{border-color:var(--cyan);color:var(--cyan);}
+.mic.on{border-color:var(--red);color:var(--red);background:rgba(255,45,85,.05);animation:mp 1.5s infinite;}
+@keyframes mp{0%,100%{box-shadow:0 0 0 0 rgba(255,45,85,.3)}50%{box-shadow:0 0 0 9px rgba(255,45,85,0)}}
+.trans{margin-top:6px;font-size:8px;color:var(--dim);min-height:12px;text-align:center;font-style:italic;}
+
+/* TEXT INPUT */
+.tsec{padding:0 12px 9px;flex-shrink:0;}
+.trow{display:flex;gap:5px;}
+.tin{flex:1;padding:8px 10px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;
+  color:var(--text);font-family:'Space Mono',monospace;font-size:10px;outline:none;}
+.tin:focus{border-color:var(--cyan);}
+.tin::placeholder{color:var(--dim);}
+.sbtn{padding:8px 13px;background:var(--cyan);border:none;border-radius:3px;
+  color:#000;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;}
+.sbtn:hover{background:#33eeff;}
+
+/* QUICK */
+.qsec{padding:0 12px 12px;flex-shrink:0;}
+.ql{font-size:7px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:5px;}
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.qb{padding:5px 7px;background:var(--s2);border:1px solid var(--b1);border-radius:3px;
+  color:var(--dim);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;
+  transition:all .15s;text-align:left;}
+.qb:hover{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,.05);}
+
+/* FLASH / TOAST */
+#flash{position:fixed;inset:0;background:rgba(0,229,255,.08);pointer-events:none;opacity:0;z-index:500;transition:opacity .08s;}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--s2);border:1px solid var(--cyan);border-radius:3px;padding:7px 16px;
+  font-size:9px;letter-spacing:1px;color:var(--cyan);opacity:0;transition:all .25s;z-index:9999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="bar">
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <div class="logo">TRADING <span>COACH</span> AI</div>
+      <div style="font-size:8px;letter-spacing:2px;color:var(--dim);">NQ · GOLD · ATAS</div>
+    </div>
+    <div class="pills">
+      <div class="pill"><div class="dot" id="dS"></div><span id="lS">ÉCRAN OFF</span></div>
+      <div class="pill"><div class="dot" id="dM"></div><span id="lM">MIC OFF</span></div>
+      <div class="pill"><div class="dot" id="dA"></div><span id="lA">AI PRÊT</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SCREEN -->
+    <div class="screen">
+      <div class="sv">
+        <div class="scanline" id="scan"></div>
+        <div class="idle" id="idle">
+          <div class="idle-ico">🖥</div>
+          <div class="idle-t">Vision OFF</div>
+          <div class="idle-d">Clique <b>▶ ACTIVER</b> pour partager<br>ton écran TradingView ou ATAS</div>
+        </div>
+        <video id="vid" autoplay muted playsinline></video>
+      </div>
+      <div class="ctrl">
+        <button class="btn go" id="bStart" onclick="startScreen()">▶ ACTIVER</button>
+        <button class="btn stop" id="bStop" onclick="stopScreen()" disabled>◼ STOP</button>
+        <button class="btn" id="bSnap" onclick="analyze(null,true)" disabled>📸 ANALYSER</button>
+        <div class="sp"></div>
+        <span class="atimer" id="atimer">AUTO --s</span>
+        <button class="btn" id="bAuto" onclick="toggleAuto()" disabled>⚡ AUTO OFF</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="side">
+      <div class="side-hd">
+        <div class="side-title">Coach IA</div>
+        <div class="side-acts">
+          <button class="vmbtn" id="vmBtn" onclick="toggleVM()">🔊 VOIX OFF</button>
+          <button class="clrbtn" onclick="clearChat()">[ clear ]</button>
+        </div>
+      </div>
+
+      <!-- API KEY -->
+      <div class="apibox" id="apibox">
+        <div class="api-label">🔑 Clé API Google Gemini</div>
+        <div class="api-row">
+          <input class="api-in" id="apiIn" type="password" placeholder="AIza...">
+          <button class="api-ok" onclick="saveKey()">OK</button>
+        </div>
+        <div class="api-hint">Gratuit sur aistudio.google.com → Get API Key</div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="msgs" id="msgs">
+        <div class="msg ai">
+          <div class="msg-lbl">AI COACH</div>
+          <div class="bubble">Bonjour Fred 👋<br><br>1. Entre ta clé API Gemini<br>2. Clique <b>▶ ACTIVER</b> pour partager ton écran<br>3. Parle-moi ou clique <b>📸 ANALYSER</b></div>
+        </div>
+        <div class="typing" id="typ"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+      </div>
+
+      <!-- MIC -->
+      <div class="vsec">
+        <button class="mic" id="micBtn" onclick="toggleMic()">
+          <span id="micIco">🎙</span><span id="micLbl">APPUIE POUR PARLER</span>
+        </button>
+        <div class="trans" id="trans"></div>
+      </div>
+
+      <!-- TEXT -->
+      <div class="tsec">
+        <div class="trow">
+          <input class="tin" id="tin" placeholder="Tape ta question..." onkeydown="if(event.key==='Enter')sendText()">
+          <button class="sbtn" onclick="sendText()">→</button>
+        </div>
+      </div>
+
+      <!-- QUICK -->
+      <div class="qsec">
+        <div class="ql">ANALYSE RAPIDE</div>
+        <div class="qg">
+          <button class="qb" onclick="q('Analyse le Volume Profile visible sur mon chart')">📊 Volume Profile</button>
+          <button class="qb" onclick="q('Où est le POC, VAH et VAL ?')">📍 POC / VA</button>
+          <button class="qb" onclick="q('Quel est le biais directionnel actuel ?')">🧭 Biais</button>
+          <button class="qb" onclick="q('Y a-t-il un setup de trade exploitable ?')">⚡ Setup</button>
+          <button class="qb" onclick="q('Analyse la structure de marché HH HL LH LL')">🏗 Structure</button>
+          <button class="qb" onclick="q('Propose des niveaux SL et TP optimaux')">🎯 SL / TP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="flash"></div>
+<div id="toast"></div>
+
+<script>
+let apiKey = localStorage.getItem('gc_key') || '';
+let stream = null, autoOn = false, autoCount = 30, autoInt = null;
+let isAnalyzing = false, voiceOnly = false;
+let recog = null, listening = false;
+const synth = window.speechSynthesis;
+const vid = document.getElementById('vid');
+const cvs = document.createElement('canvas');
+const c2 = cvs.getContext('2d');
+
+// Init
+window.addEventListener('load', () => {
+  if (apiKey) {
+    document.getElementById('apiIn').value = apiKey;
+    document.getElementById('apibox').style.background = 'rgba(0,255,136,.03)';
+    document.getElementById('apibox').style.borderColor = 'var(--green)';
+  }
+});
+
+function saveKey() {
+  const v = document.getElementById('apiIn').value.trim();
+  if (v.length < 10) { showToast('❌ Clé invalide'); return; }
+  apiKey = v;
+  localStorage.setItem('gc_key', apiKey);
+  document.getElementById('apibox').style.background = 'rgba(0,255,136,.03)';
+  showToast('✅ Clé sauvegardée !');
+  addMsg('ai', 'Clé API enregistrée ✅\n\nMaintenant clique <b>▶ ACTIVER</b> pour partager ton écran !');
+}
+
+// Screen
+async function startScreen() {
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 5, cursor: 'always' }, audio: false });
+    vid.srcObject = stream;
+    vid.style.display = 'block';
+    document.getElementById('idle').style.display = 'none';
+    document.getElementById('scan').classList.add('go');
+    stream.getVideoTracks()[0].onended = stopScreen;
+    setDot('S', 'on', 'VISION ON');
+    setBtn(true);
+    showToast('✅ Vision activée');
+    addMsg('ai', 'Je vois ton écran ✅\n\nClique <b>📸 ANALYSER</b> ou parle-moi vocalement !');
+  } catch(e) {
+    if (e.name !== 'NotAllowedError') showToast('❌ ' + e.message);
+  }
+}
+
+function stopScreen() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  vid.style.display = 'none'; vid.srcObject = null;
+  document.getElementById('idle').style.display = 'flex';
+  document.getElementById('scan').classList.remove('go');
+  stopAuto(); setDot('S', '', 'ÉCRAN OFF'); setBtn(false);
+}
+
+function setBtn(on) {
+  document.getElementById('bStart').disabled = on;
+  document.getElementById('bStop').disabled = !on;
+  document.getElementById('bSnap').disabled = !on;
+  document.getElementById('bAuto').disabled = !on;
+}
+
+function capture() {
+  if (!stream || vid.videoWidth === 0) return null;
+  cvs.width = vid.videoWidth; cvs.height = vid.videoHeight;
+  c2.drawImage(vid, 0, 0);
+  return cvs.toDataURL('image/jpeg', 0.82).split(',')[1];
+}
+
+// Auto
+function toggleAuto() {
+  if (!autoOn) {
+    autoOn = true; autoCount = 30;
+    document.getElementById('bAuto').textContent = '⚡ AUTO ON';
+    document.getElementById('bAuto').classList.add('auto-on');
+    document.getElementById('atimer').classList.add('show');
+    autoInt = setInterval(() => {
+      autoCount--;
+      document.getElementById('atimer').textContent = `AUTO ${autoCount}s`;
+      if (autoCount <= 0) { autoCount = 30; analyze('Analyse auto — biais, niveaux clés et opportunité sur mon chart.'); }
+    }, 1000);
+    showToast('⚡ Auto-analyse toutes les 30s');
+  } else { stopAuto(); showToast('⏸ Auto OFF'); }
+}
+
+function stopAuto() {
+  autoOn = false; clearInterval(autoInt);
+  document.getElementById('bAuto').textContent = '⚡ AUTO OFF';
+  document.getElementById('bAuto').classList.remove('auto-on');
+  document.getElementById('atimer').classList.remove('show');
+}
+
+// Analyze
+async function analyze(userQ = null, doFlash = false) {
+  if (isAnalyzing) return;
+  if (!apiKey) { showToast('⚠️ Entre ta clé API d\'abord !'); return; }
+  isAnalyzing = true;
+  setDot('A', 'rec', 'AI BUSY');
+  if (doFlash) { flashFx(); }
+
+  const frame = capture();
+  const question = userQ || 'Analyse ce chart en détail : Volume Profile, biais directionnel, niveaux clés, opportunité de trade.';
+  if (userQ) addMsg('usr', userQ);
+  showTyp(true);
+
+  try {
+    const parts = [];
+    if (frame) parts.push({ inlineData: { mimeType: 'image/jpeg', data: frame } });
+    parts.push({ text: `Tu es un coach de trading expert NQ Futures (Nasdaq) et Gold (XAUUSD), spécialisé Volume Profile, Market Structure, Order Flow, Price Action, scalping ATAS/TradingView. Réponds en français, max 120 mots, clair et actionnable. Structure: 📊 analyse | 🧭 biais 🟢 haussier / 🔴 baissier | 🎯 niveaux | ⚡ action.\n\n${question}` });
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }] })
+    });
+
+    const data = await res.json();
+    showTyp(false);
+
+    if (data.error) {
+      addMsg('ai', `❌ Erreur: ${data.error.message}`);
+    } else {
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Pas de réponse.';
+      if (!voiceOnly) addMsg('ai', reply);
+      speak(reply);
+    }
+  } catch(err) {
+    showTyp(false);
+    addMsg('ai', '❌ Erreur de connexion.');
+  }
+
+  setDot('A', 'on', 'AI PRÊT');
+  isAnalyzing = false;
+}
+
+// Voice input
+function toggleMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('⚠️ Chrome requis pour la voix'); return; }
+  if (listening) { recog?.stop(); return; }
+
+  recog = new SR();
+  recog.lang = 'fr-FR'; recog.continuous = false; recog.interimResults = true;
+  recog.onstart = () => { listening = true; micUI(true); setDot('M', 'rec', 'MIC ON'); };
+  recog.onresult = e => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      e.results[i].isFinal ? final += t : interim += t;
+    }
+    document.getElementById('trans').textContent = interim || final;
+    if (final) { analyze(final); document.getElementById('trans').textContent = ''; }
+  };
+  recog.onend = () => { listening = false; micUI(false); setDot('M', '', 'MIC OFF'); setTimeout(() => document.getElementById('trans').textContent = '', 2000); };
+  recog.onerror = e => { if (e.error !== 'aborted') showToast('Mic: ' + e.error); recog.onend(); };
+  recog.start();
+}
+
+function micUI(on) {
+  document.getElementById('micBtn').classList.toggle('on', on);
+  document.getElementById('micLbl').textContent = on ? 'ÉCOUTE EN COURS...' : 'APPUIE POUR PARLER';
+  document.getElementById('micIco').textContent = on ? '🔴' : '🎙';
+}
+
+// Voice output
+function speak(text) {
+  if (!synth) return;
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/[*_`#📊🧭🎯⚡🟢🔴]/g, '').replace(/\n/g, ' '));
+  u.lang = 'fr-FR'; u.rate = 1.05; u.pitch = 1;
+  synth.speak(u);
+}
+
+function toggleVM() {
+  voiceOnly = !voiceOnly;
+  const b = document.getElementById('vmBtn');
+  b.textContent = voiceOnly ? '🔊 VOIX ON' : '🔊 VOIX OFF';
+  b.classList.toggle('on', voiceOnly);
+  showToast(voiceOnly ? '🔊 Voix seule activée' : '💬 Texte + voix');
+}
+
+function sendText() {
+  const v = document.getElementById('tin').value.trim();
+  if (!v) return;
+  document.getElementById('tin').value = '';
+  analyze(v);
+}
+
+function q(txt) { analyze(txt); }
+
+// UI helpers
+function addMsg(role, html) {
+  if (voiceOnly && role === 'ai') return;
+  const msgs = document.getElementById('msgs');
+  const typ = document.getElementById('typ');
+  const d = document.createElement('div'); d.className = 'msg ' + role;
+  const l = document.createElement('div'); l.className = 'msg-lbl'; l.textContent = role === 'ai' ? 'AI COACH' : 'FRED';
+  const b = document.createElement('div'); b.className = 'bubble';
+  b.innerHTML = html.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/(🟢[^\n<]*)/g, '<span class="up">$1</span>')
+    .replace(/(🔴[^\n<]*)/g, '<span class="dn">$1</span>');
+  d.appendChild(l); d.appendChild(b);
+  msgs.insertBefore(d, typ);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyp(s) { document.getElementById('typ').classList.toggle('show', s); document.getElementById('msgs').scrollTop = 9999; }
+function clearChat() { const m = document.getElementById('msgs'), t = document.getElementById('typ'); Array.from(m.children).forEach(c => { if (c !== t) c.remove(); }); }
+function setDot(n, type, label) { document.getElementById('d' + n).className = 'dot ' + (type || ''); document.getElementById('l' + n).textContent = label; }
+function flashFx() { const f = document.getElementById('flash'); f.style.opacity = '1'; setTimeout(() => f.style.opacity = '0', 120); }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+</script>
+</body>
+</html>
