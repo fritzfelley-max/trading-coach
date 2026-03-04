@@ -373,7 +373,7 @@ async function analyze(userQ = null, doFlash = false) {
     if (frame) parts.push({ inlineData: { mimeType: 'image/jpeg', data: frame } });
     parts.push({ text: `Tu es un coach de trading expert NQ Futures (Nasdaq) et Gold (XAUUSD), spécialisé Volume Profile, Market Structure, Order Flow, Price Action, scalping ATAS/TradingView. Réponds en français, max 120 mots, clair et actionnable. Structure: 📊 analyse | 🧭 biais 🟢 haussier / 🔴 baissier | 🎯 niveaux | ⚡ action.\n\n${question}` });
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts }] })
