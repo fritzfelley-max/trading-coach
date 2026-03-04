@@ -211,12 +211,12 @@ body::before{content:'';position:fixed;inset:0;
 
       <!-- API KEY -->
       <div class="apibox" id="apibox">
-        <div class="api-label">🔑 Clé API Google Gemini</div>
+        <div class="api-label">🔑 Clé API OpenRouter</div>
         <div class="api-row">
-          <input class="api-in" id="apiIn" type="password" placeholder="AIza...">
+          <input class="api-in" id="apiIn" type="password" placeholder="sk-or-...">
           <button class="api-ok" onclick="saveKey()">OK</button>
         </div>
-        <div class="api-hint">Gratuit sur aistudio.google.com → Get API Key</div>
+        <div class="api-hint">Gratuit sur openrouter.ai → Keys → Create Key</div>
       </div>
 
       <!-- MESSAGES -->
@@ -369,14 +369,30 @@ async function analyze(userQ = null, doFlash = false) {
   showTyp(true);
 
   try {
-    const parts = [];
-    if (frame) parts.push({ inlineData: { mimeType: 'image/jpeg', data: frame } });
-    parts.push({ text: `Tu es un coach de trading expert NQ Futures (Nasdaq) et Gold (XAUUSD), spécialisé Volume Profile, Market Structure, Order Flow, Price Action, scalping ATAS/TradingView. Réponds en français, max 120 mots, clair et actionnable. Structure: 📊 analyse | 🧭 biais 🟢 haussier / 🔴 baissier | 🎯 niveaux | ⚡ action.\n\n${question}` });
+    const messages = [];
+    const systemPrompt = "Tu es un coach de trading expert NQ Futures (Nasdaq) et Gold (XAUUSD), spécialisé Volume Profile, Market Structure, Order Flow, Price Action, scalping ATAS/TradingView. Réponds en français, max 120 mots, clair et actionnable. Structure: 📊 analyse | 🧭 biais 🟢 haussier / 🔴 baissier | 🎯 niveaux | ⚡ action.";
+    
+    if (frame) {
+      messages.push({ role: 'user', content: [
+        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${frame}` } },
+        { type: 'text', text: question }
+      ]});
+    } else {
+      messages.push({ role: 'user', content: question });
+    }
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`, {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts }] })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://fritzfelley-max.github.io/trading-coach/',
+        'X-Title': 'Trading Coach AI'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.2-11b-vision-instruct:free',
+        messages: [{ role: 'system', content: systemPrompt }, ...messages]
+      })
     });
 
     const data = await res.json();
@@ -385,7 +401,7 @@ async function analyze(userQ = null, doFlash = false) {
     if (data.error) {
       addMsg('ai', `❌ Erreur: ${data.error.message}`);
     } else {
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Pas de réponse.';
+      const reply = data.choices?.[0]?.message?.content || 'Pas de réponse.';
       if (!voiceOnly) addMsg('ai', reply);
       speak(reply);
     }
