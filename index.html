@@ -10,6 +10,8 @@
   --bg:#060a0f;--s1:#0a1018;--s2:#0f1825;--b1:#182433;--b2:#1e2f42;
   --cyan:#00e5ff;--gold:#f5c518;--green:#00ff88;--red:#ff2d55;
   --text:#c8e0ee;--dim:#3a5568;
+  --dg:#00d084;--dg-bg:#00200f;--dg-b:#005c35;
+  --dr:#ff4757;--dr-bg:#200008;--dr-b:#7a0018;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;}
@@ -24,15 +26,27 @@ body::before{content:'';position:fixed;inset:0;
 .logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
   color:var(--cyan);text-shadow:0 0 18px rgba(0,229,255,.45);}
 .logo span{color:var(--gold);}
+.bar-center{display:flex;align-items:center;gap:10px;}
 .pills{display:flex;gap:12px;}
 .pill{display:flex;align-items:center;gap:5px;font-size:8px;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--dim);}
 .dot.on{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
 .dot.rec{background:var(--red);box-shadow:0 0 6px var(--red);animation:blink .7s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.dash-toggle{display:flex;align-items:center;gap:5px;padding:5px 12px;
+  background:transparent;border:1px solid var(--b2);border-radius:3px;
+  color:var(--dim);font-family:'Space Mono',monospace;font-size:8px;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.dash-toggle:hover,.dash-toggle.on{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,.07);}
+.nq-price-hdr{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text);}
+.trend-hdr{font-size:8px;font-weight:700;letter-spacing:2px;padding:2px 8px;border-radius:2px;}
+.th-bull{background:var(--dg-bg);border:1px solid var(--dg-b);color:var(--dg);}
+.th-bear{background:var(--dr-bg);border:1px solid var(--dr-b);color:var(--dr);}
+.th-neut{background:var(--s2);border:1px solid var(--b2);color:var(--dim);}
 
 /* MAIN */
-.main{display:grid;grid-template-columns:1fr 320px;flex:1;overflow:hidden;}
+.main{display:grid;grid-template-columns:1fr 320px;flex:1;overflow:hidden;transition:grid-template-columns .3s;}
+.main.dash-open{grid-template-columns:1fr 320px 300px;}
 
 /* SCREEN */
 .screen{display:flex;flex-direction:column;border-right:1px solid var(--b1);}
@@ -69,8 +83,8 @@ body::before{content:'';position:fixed;inset:0;
 .atimer{font-size:9px;color:var(--gold);display:none;letter-spacing:1px;}
 .atimer.show{display:block;}
 
-/* SIDEBAR */
-.side{display:flex;flex-direction:column;background:var(--s1);overflow:hidden;}
+/* COACH SIDEBAR */
+.side{display:flex;flex-direction:column;background:var(--s1);overflow:hidden;border-right:1px solid var(--b1);}
 .side-hd{padding:10px 14px;border-bottom:1px solid var(--b1);
   display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .side-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--cyan);}
@@ -81,8 +95,6 @@ body::before{content:'';position:fixed;inset:0;
 .vmbtn.on{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.06);}
 .clrbtn{background:none;border:none;color:var(--dim);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;}
 .clrbtn:hover{color:var(--text);}
-
-/* API KEY SECTION */
 .apibox{padding:9px 12px;border-bottom:1px solid var(--b1);background:rgba(245,197,24,.04);flex-shrink:0;}
 .api-label{font-size:7px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;}
 .api-row{display:flex;gap:5px;}
@@ -93,8 +105,6 @@ body::before{content:'';position:fixed;inset:0;
 .api-ok{padding:6px 12px;background:var(--gold);border:none;border-radius:3px;
   color:#000;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;cursor:pointer;}
 .api-hint{font-size:7px;color:var(--dim);margin-top:4px;}
-
-/* MESSAGES */
 .msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;
   scrollbar-width:thin;scrollbar-color:var(--b2) transparent;}
 .msg{display:flex;flex-direction:column;gap:3px;animation:min .22s ease;}
@@ -109,8 +119,6 @@ body::before{content:'';position:fixed;inset:0;
 .msg.ai .bubble b{color:var(--cyan);}
 .up{color:var(--green);font-weight:700;}
 .dn{color:var(--red);font-weight:700;}
-
-/* TYPING */
 .typing{display:none;align-items:center;gap:4px;padding:8px 11px;
   background:var(--s2);border:1px solid var(--b1);border-left:2px solid var(--cyan);
   border-radius:3px;width:fit-content;}
@@ -118,8 +126,6 @@ body::before{content:'';position:fixed;inset:0;
 .td{width:4px;height:4px;border-radius:50%;background:var(--cyan);animation:td 1.2s infinite;}
 .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
 @keyframes td{0%,60%,100%{opacity:.2;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
-
-/* VOICE */
 .vsec{padding:10px 12px;border-top:1px solid var(--b1);flex-shrink:0;}
 .mic{width:100%;padding:13px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;
   color:var(--text);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;
@@ -129,8 +135,6 @@ body::before{content:'';position:fixed;inset:0;
 .mic.on{border-color:var(--red);color:var(--red);background:rgba(255,45,85,.05);animation:mp 1.5s infinite;}
 @keyframes mp{0%,100%{box-shadow:0 0 0 0 rgba(255,45,85,.3)}50%{box-shadow:0 0 0 9px rgba(255,45,85,0)}}
 .trans{margin-top:6px;font-size:8px;color:var(--dim);min-height:12px;text-align:center;font-style:italic;}
-
-/* TEXT INPUT */
 .tsec{padding:0 12px 9px;flex-shrink:0;}
 .trow{display:flex;gap:5px;}
 .tin{flex:1;padding:8px 10px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;
@@ -140,8 +144,6 @@ body::before{content:'';position:fixed;inset:0;
 .sbtn{padding:8px 13px;background:var(--cyan);border:none;border-radius:3px;
   color:#000;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;}
 .sbtn:hover{background:#33eeff;}
-
-/* QUICK */
 .qsec{padding:0 12px 12px;flex-shrink:0;}
 .ql{font-size:7px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:5px;}
 .qg{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
@@ -150,7 +152,122 @@ body::before{content:'';position:fixed;inset:0;
   transition:all .15s;text-align:left;}
 .qb:hover{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,.05);}
 
-/* FLASH / TOAST */
+/* ═══════════════════════════════════════
+   DASHBOARD PANEL
+═══════════════════════════════════════ */
+.dash{display:none;flex-direction:column;background:var(--s1);overflow-y:auto;
+  border-left:1px solid var(--b1);width:300px;flex-shrink:0;
+  scrollbar-width:thin;scrollbar-color:var(--b2) transparent;}
+.dash.open{display:flex;}
+.dash-hd{padding:10px 12px;border-bottom:1px solid var(--b1);flex-shrink:0;
+  font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--gold);
+  display:flex;align-items:center;justify-content:space-between;}
+.dsec{padding:10px 12px;border-bottom:1px solid var(--b1);}
+.dsec-t{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+
+/* Signal */
+.sig-block{padding:10px;border-radius:4px;border:1.5px solid var(--b2);background:var(--s2);margin-bottom:6px;transition:all .3s;}
+.sig-bull{background:var(--dg-bg);border-color:var(--dg);}
+.sig-bear{background:var(--dr-bg);border-color:var(--dr);}
+.sig-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.sig-dir{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;}
+.sig-bull .sig-dir{color:var(--dg);}
+.sig-bear .sig-dir{color:var(--dr);}
+.sig-neut .sig-dir{color:var(--dim);}
+.sig-str{font-size:9px;font-weight:700;}
+.sig-bull .sig-str{color:var(--dg);}
+.sig-bear .sig-str{color:var(--dr);}
+.pow-bar{height:5px;background:#1a1f2a;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.pow-fill{height:100%;border-radius:3px;transition:width .5s;}
+.vol-row{display:flex;align-items:center;gap:6px;}
+.vol-lbl{font-size:8px;color:var(--dim);width:30px;}
+.vol-track{flex:1;height:7px;background:#1a1f2a;border-radius:3px;overflow:hidden;}
+.vol-fill{height:100%;border-radius:3px;transition:width .5s,background .3s;}
+.vol-pct{font-size:9px;font-weight:700;width:60px;text-align:right;}
+
+/* Levels */
+.lvl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.lvl-col-t{font-size:7px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--b1);}
+.lvl-b{padding:5px 7px;border-radius:3px;border:1.5px solid var(--b2);background:var(--s2);
+  margin-bottom:4px;transition:all .3s;}
+.lvl-hit{background:var(--dg-bg);border-color:var(--dg);animation:flg .5s 3;}
+.lvl-above{border-color:var(--dr-b);}
+.lvl-below{border-color:var(--b2);}
+@keyframes flg{0%,100%{opacity:1}50%{opacity:.2}}
+.lvl-n{font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px;}
+.lvl-hit .lvl-n{color:var(--dg);}
+.lvl-above .lvl-n{color:var(--dr);}
+.lvl-below .lvl-n,.lvl-empty .lvl-n{color:var(--dim);}
+.lvl-v{font-family:'Bebas Neue',sans-serif;font-size:13px;}
+.lvl-hit .lvl-v{color:var(--dg);}
+.lvl-above .lvl-v{color:var(--dr);}
+.lvl-below .lvl-v,.lvl-empty .lvl-v{color:var(--text);}
+.lvl-d{font-size:8px;margin-top:1px;}
+.lvl-hit .lvl-d{color:var(--dg);}
+.lvl-above .lvl-d{color:var(--dr);}
+.lvl-below .lvl-d,.lvl-empty .lvl-d{color:var(--dim);}
+
+/* Dumb money */
+.dm-hdr{display:flex;justify-content:space-between;margin-bottom:4px;font-size:9px;font-weight:700;}
+.dm-long{color:var(--dg);}
+.dm-short{color:var(--dr);}
+.dm-interp{font-size:8px;color:var(--dim);text-align:center;}
+.dm-track{height:10px;background:var(--dr-bg);border:1px solid var(--dr-b);border-radius:5px;overflow:hidden;}
+.dm-fill{height:100%;background:var(--dg);border-radius:5px;transition:width .5s;}
+
+/* Whales */
+.wh-row{display:flex;align-items:center;gap:6px;padding:5px 0;
+  border-bottom:1px solid var(--b1);font-size:9px;}
+.wh-row:last-child{border-bottom:none;}
+.wh-buy{color:var(--dg);font-weight:700;}
+.wh-sell{color:var(--dr);font-weight:700;}
+.wh-bar-wrap{flex:1;height:3px;background:#1a1f2a;border-radius:2px;overflow:hidden;}
+.wh-bar{height:100%;border-radius:2px;}
+.wh-sz{color:var(--dim);font-size:8px;}
+.wh-time{color:var(--dim);font-size:8px;}
+
+/* News */
+.nw-row{display:flex;gap:6px;padding:5px 0;border-bottom:1px solid var(--b1);font-size:9px;align-items:flex-start;}
+.nw-row:last-child{border-bottom:none;}
+.nw-t{color:var(--dim);white-space:nowrap;font-size:8px;min-width:30px;}
+.nw-h{font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;white-space:nowrap;
+  background:var(--dr-bg);border:1px solid var(--dr-b);color:var(--dr);}
+.nw-m{font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;white-space:nowrap;
+  background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.2);color:var(--gold);}
+.nw-l{font-size:8px;padding:1px 4px;border-radius:2px;white-space:nowrap;
+  background:var(--s2);border:1px solid var(--b2);color:var(--dim);}
+.nw-txt{color:var(--text);line-height:1.4;}
+
+/* Reminders */
+.rm-row{display:flex;align-items:flex-start;gap:6px;padding:4px 0;
+  border-bottom:1px solid var(--b1);font-size:9px;color:var(--dim);}
+.rm-row:last-child{border-bottom:none;}
+.rm-chk{width:12px;height:12px;border-radius:2px;border:1px solid var(--b2);
+  cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;
+  justify-content:center;font-size:8px;transition:all .15s;}
+.rm-chk.done{background:var(--dg);border-color:var(--dg);color:#000;}
+.rm-done{text-decoration:line-through;color:var(--dim);}
+
+/* Dash inputs */
+.d-inp{width:100%;padding:4px 7px;background:var(--s2);border:1px solid var(--b2);
+  border-radius:3px;color:var(--text);font-family:'Space Mono',monospace;
+  font-size:9px;outline:none;margin-bottom:3px;}
+.d-inp:focus{border-color:var(--cyan);}
+.d-inp::placeholder{color:var(--dim);}
+.d-row{display:flex;gap:4px;margin-top:4px;}
+.d-row .d-inp{margin-bottom:0;}
+.d-btn{padding:4px 9px;background:var(--s2);border:1px solid var(--b2);border-radius:3px;
+  color:var(--dim);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;
+  white-space:nowrap;transition:all .15s;}
+.d-btn:hover{border-color:var(--dg);color:var(--dg);}
+.d-btn-full{width:100%;margin-top:5px;text-align:center;}
+.d-sel{background:var(--s2);border:1px solid var(--b2);border-radius:3px;
+  color:var(--text);font-family:'Space Mono',monospace;font-size:9px;
+  padding:4px 6px;outline:none;flex:1;}
+.empty-d{font-size:9px;color:var(--dim);padding:4px 0;}
+
+/* Flash / Toast */
 #flash{position:fixed;inset:0;background:rgba(0,229,255,.08);pointer-events:none;opacity:0;z-index:500;transition:opacity .08s;}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(8px);
   background:var(--s2);border:1px solid var(--cyan);border-radius:3px;padding:7px 16px;
@@ -168,15 +285,22 @@ body::before{content:'';position:fixed;inset:0;
       <div class="logo">TRADING <span>COACH</span> AI</div>
       <div style="font-size:8px;letter-spacing:2px;color:var(--dim);">NQ · GOLD · ATAS</div>
     </div>
-    <div class="pills">
-      <div class="pill"><div class="dot" id="dS"></div><span id="lS">ÉCRAN OFF</span></div>
-      <div class="pill"><div class="dot" id="dM"></div><span id="lM">MIC OFF</span></div>
-      <div class="pill"><div class="dot" id="dA"></div><span id="lA">AI PRÊT</span></div>
+    <div class="bar-center">
+      <div class="nq-price-hdr" id="hdr-price" style="display:none">—</div>
+      <div class="trend-hdr th-neut" id="hdr-trend" style="display:none">NEUTRE</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="pills">
+        <div class="pill"><div class="dot" id="dS"></div><span id="lS">ÉCRAN OFF</span></div>
+        <div class="pill"><div class="dot" id="dM"></div><span id="lM">MIC OFF</span></div>
+        <div class="pill"><div class="dot" id="dA"></div><span id="lA">AI PRÊT</span></div>
+      </div>
+      <button class="dash-toggle" id="dashToggle" onclick="toggleDash()">📊 DASH</button>
     </div>
   </div>
 
   <!-- MAIN -->
-  <div class="main">
+  <div class="main" id="mainGrid">
 
     <!-- SCREEN -->
     <div class="screen">
@@ -199,7 +323,7 @@ body::before{content:'';position:fixed;inset:0;
       </div>
     </div>
 
-    <!-- SIDEBAR -->
+    <!-- COACH SIDEBAR -->
     <div class="side">
       <div class="side-hd">
         <div class="side-title">Coach IA</div>
@@ -208,8 +332,6 @@ body::before{content:'';position:fixed;inset:0;
           <button class="clrbtn" onclick="clearChat()">[ clear ]</button>
         </div>
       </div>
-
-      <!-- API KEY -->
       <div class="apibox" id="apibox">
         <div class="api-label">🔑 Clé API OpenRouter</div>
         <div class="api-row">
@@ -218,33 +340,25 @@ body::before{content:'';position:fixed;inset:0;
         </div>
         <div class="api-hint">Gratuit sur openrouter.ai → Keys → Create Key</div>
       </div>
-
-      <!-- MESSAGES -->
       <div class="msgs" id="msgs">
         <div class="msg ai">
           <div class="msg-lbl">AI COACH</div>
-          <div class="bubble">Bonjour Fred 👋<br><br>1. Entre ta clé API Gemini<br>2. Clique <b>▶ ACTIVER</b> pour partager ton écran<br>3. Parle-moi ou clique <b>📸 ANALYSER</b></div>
+          <div class="bubble">Bonjour Fred 👋<br><br>1. Entre ta clé API Gemini<br>2. Clique <b>▶ ACTIVER</b> pour partager ton écran<br>3. Parle-moi ou clique <b>📸 ANALYSER</b><br><br>Clique <b>📊 DASH</b> pour ouvrir le dashboard NQ !</div>
         </div>
         <div class="typing" id="typ"><div class="td"></div><div class="td"></div><div class="td"></div></div>
       </div>
-
-      <!-- MIC -->
       <div class="vsec">
         <button class="mic" id="micBtn" onclick="toggleMic()">
           <span id="micIco">🎙</span><span id="micLbl">APPUIE POUR PARLER</span>
         </button>
         <div class="trans" id="trans"></div>
       </div>
-
-      <!-- TEXT -->
       <div class="tsec">
         <div class="trow">
           <input class="tin" id="tin" placeholder="Tape ta question..." onkeydown="if(event.key==='Enter')sendText()">
           <button class="sbtn" onclick="sendText()">→</button>
         </div>
       </div>
-
-      <!-- QUICK -->
       <div class="qsec">
         <div class="ql">ANALYSE RAPIDE</div>
         <div class="qg">
@@ -257,13 +371,163 @@ body::before{content:'';position:fixed;inset:0;
         </div>
       </div>
     </div>
-  </div>
-</div>
+
+    <!-- DASHBOARD PANEL -->
+    <div class="dash" id="dashPanel">
+      <div class="dash-hd">
+        <span>NQ DASHBOARD</span>
+        <span id="dash-clock" style="font-size:11px;color:var(--cyan)">--:--:--</span>
+      </div>
+
+      <!-- PRIX + SIGNAL -->
+      <div class="dsec">
+        <div class="dsec-t">Prix NQ + Signal marché</div>
+        <div class="sig-block sig-neut" id="sig-block">
+          <div class="sig-top">
+            <div class="sig-dir" id="sig-dir">NEUTRE</div>
+            <div class="sig-str" id="sig-str">—</div>
+          </div>
+          <div class="pow-bar"><div class="pow-fill" id="pow-fill" style="width:0%;background:var(--dim)"></div></div>
+          <div class="vol-row">
+            <div class="vol-lbl">VOL</div>
+            <div class="vol-track"><div class="vol-fill" id="vol-fill" style="width:0%"></div></div>
+            <div class="vol-pct" id="vol-pct" style="color:var(--dim)">—</div>
+          </div>
+        </div>
+        <div class="d-row">
+          <input class="d-inp" id="price-in" type="number" step="0.25" placeholder="Prix NQ actuel" style="flex:2"/>
+          <button class="d-btn" onclick="setPrice()">MAJ</button>
+        </div>
+        <div class="d-row" style="margin-top:4px">
+          <select class="d-sel" id="sig-sel">
+            <option value="bull">Haussier</option>
+            <option value="neut" selected>Neutre</option>
+            <option value="bear">Baissier</option>
+          </select>
+          <input class="d-inp" id="sig-pow" type="number" min="0" max="100" placeholder="Force%" style="width:55px;flex:none;margin-bottom:0"/>
+          <input class="d-inp" id="vol-in" type="number" min="0" max="100" placeholder="Vol%" style="width:50px;flex:none;margin-bottom:0"/>
+          <button class="d-btn" onclick="setSignal()">OK</button>
+        </div>
+      </div>
+
+      <!-- NIVEAUX -->
+      <div class="dsec">
+        <div class="dsec-t">VAH / VAL / POC</div>
+        <div class="lvl-grid">
+          <div>
+            <div class="lvl-col-t">Jour -1</div>
+            <div class="lvl-b lvl-empty" id="d1-vah-b"><div class="lvl-n">VAH</div><div class="lvl-v" id="d1-vah-v">—</div><div class="lvl-d" id="d1-vah-d">—</div></div>
+            <div class="lvl-b lvl-empty" id="d1-val-b"><div class="lvl-n">VAL</div><div class="lvl-v" id="d1-val-v">—</div><div class="lvl-d" id="d1-val-d">—</div></div>
+            <div class="lvl-b lvl-empty" id="d1-poc-b"><div class="lvl-n">POC</div><div class="lvl-v" id="d1-poc-v">—</div><div class="lvl-d" id="d1-poc-d">—</div></div>
+          </div>
+          <div>
+            <div class="lvl-col-t">Sem -1</div>
+            <div class="lvl-b lvl-empty" id="s1-vah-b"><div class="lvl-n">VAH</div><div class="lvl-v" id="s1-vah-v">—</div><div class="lvl-d" id="s1-vah-d">—</div></div>
+            <div class="lvl-b lvl-empty" id="s1-val-b"><div class="lvl-n">VAL</div><div class="lvl-v" id="s1-val-v">—</div><div class="lvl-d" id="s1-val-d">—</div></div>
+            <div class="lvl-b lvl-empty" id="s1-poc-b"><div class="lvl-n">POC</div><div class="lvl-v" id="s1-poc-v">—</div><div class="lvl-d" id="s1-poc-d">—</div></div>
+          </div>
+          <div>
+            <div class="lvl-col-t">Mois -1</div>
+            <div class="lvl-b lvl-empty" id="m1-vah-b"><div class="lvl-n">VAH</div><div class="lvl-v" id="m1-vah-v">—</div><div class="lvl-d" id="m1-vah-d">—</div></div>
+            <div class="lvl-b lvl-empty" id="m1-val-b"><div class="lvl-n">VAL</div><div class="lvl-v" id="m1-val-v">—</div><div class="lvl-d" id="m1-val-d">—</div></div>
+            <div class="lvl-b lvl-empty" id="m1-poc-b"><div class="lvl-n">POC</div><div class="lvl-v" id="m1-poc-v">—</div><div class="lvl-d" id="m1-poc-d">—</div></div>
+          </div>
+        </div>
+        <div class="lvl-grid" style="gap:4px;margin-top:6px">
+          <div>
+            <div style="font-size:7px;color:var(--dim);margin-bottom:3px">J-1</div>
+            <input class="d-inp" id="in-d1-vah" type="number" step="0.25" placeholder="VAH"/>
+            <input class="d-inp" id="in-d1-val" type="number" step="0.25" placeholder="VAL"/>
+            <input class="d-inp" id="in-d1-poc" type="number" step="0.25" placeholder="POC"/>
+          </div>
+          <div>
+            <div style="font-size:7px;color:var(--dim);margin-bottom:3px">S-1</div>
+            <input class="d-inp" id="in-s1-vah" type="number" step="0.25" placeholder="VAH"/>
+            <input class="d-inp" id="in-s1-val" type="number" step="0.25" placeholder="VAL"/>
+            <input class="d-inp" id="in-s1-poc" type="number" step="0.25" placeholder="POC"/>
+          </div>
+          <div>
+            <div style="font-size:7px;color:var(--dim);margin-bottom:3px">M-1</div>
+            <input class="d-inp" id="in-m1-vah" type="number" step="0.25" placeholder="VAH"/>
+            <input class="d-inp" id="in-m1-val" type="number" step="0.25" placeholder="VAL"/>
+            <input class="d-inp" id="in-m1-poc" type="number" step="0.25" placeholder="POC"/>
+          </div>
+        </div>
+        <button class="d-btn d-btn-full" onclick="saveLevels()">Enregistrer niveaux</button>
+      </div>
+
+      <!-- DUMB MONEY -->
+      <div class="dsec">
+        <div class="dsec-t">Dumb Money</div>
+        <div class="dm-hdr">
+          <span class="dm-long" id="dm-long">—% Long</span>
+          <span class="dm-interp" id="dm-interp">—</span>
+          <span class="dm-short" id="dm-short">—% Short</span>
+        </div>
+        <div class="dm-track"><div class="dm-fill" id="dm-fill" style="width:50%"></div></div>
+        <div class="d-row" style="margin-top:6px">
+          <input class="d-inp" id="dm-in" type="number" min="0" max="100" placeholder="% Long (ex: 68)" style="margin-bottom:0;flex:2"/>
+          <button class="d-btn" onclick="setDumb()">MAJ</button>
+        </div>
+      </div>
+
+      <!-- BALEINES -->
+      <div class="dsec">
+        <div class="dsec-t">Baleines</div>
+        <div id="wh-list"><div class="empty-d">Aucun ordre baleine</div></div>
+        <div class="d-row" style="margin-top:6px;flex-wrap:wrap">
+          <input class="d-inp" id="wh-p" type="number" step="0.25" placeholder="Prix" style="width:70px;flex:none;margin-bottom:0"/>
+          <input class="d-inp" id="wh-s" type="number" placeholder="Contrats" style="width:65px;flex:none;margin-bottom:0"/>
+          <select class="d-sel" id="wh-side" style="flex:none;width:65px">
+            <option value="buy">BUY</option>
+            <option value="sell">SELL</option>
+          </select>
+          <button class="d-btn" onclick="addWhale()">+</button>
+        </div>
+      </div>
+
+      <!-- ANNONCES -->
+      <div class="dsec">
+        <div class="dsec-t">Annonces éco</div>
+        <div id="nw-list"><div class="empty-d">Aucune annonce</div></div>
+        <div class="d-row" style="margin-top:6px;flex-wrap:wrap">
+          <input class="d-inp" id="nw-h" placeholder="14:30" style="width:45px;flex:none;margin-bottom:0"/>
+          <select class="d-sel" id="nw-imp" style="width:55px;flex:none">
+            <option value="h">HIGH</option>
+            <option value="m">MED</option>
+            <option value="l">LOW</option>
+          </select>
+          <input class="d-inp" id="nw-txt" placeholder="Annonce..." style="flex:2;margin-bottom:0"/>
+          <button class="d-btn" onclick="addNews()">+</button>
+        </div>
+      </div>
+
+      <!-- RAPPELS -->
+      <div class="dsec">
+        <div class="dsec-t">Rappels</div>
+        <div id="rm-list">
+          <div class="rm-row"><div class="rm-chk" onclick="toggleRm(this)"></div><span>Vérifier macro avant entrée</span></div>
+          <div class="rm-row"><div class="rm-chk" onclick="toggleRm(this)"></div><span>Respecter drawdown Phidias</span></div>
+          <div class="rm-row"><div class="rm-chk" onclick="toggleRm(this)"></div><span>Pas de trade avant 15h30 CET</span></div>
+          <div class="rm-row"><div class="rm-chk" onclick="toggleRm(this)"></div><span>MCM — Micro confirme Macro</span></div>
+        </div>
+        <div class="d-row" style="margin-top:6px">
+          <input class="d-inp" id="rm-in" placeholder="Ajouter un rappel..." style="flex:3;margin-bottom:0"/>
+          <button class="d-btn" onclick="addRemind()">+</button>
+        </div>
+      </div>
+
+    </div><!-- /dash -->
+  </div><!-- /main -->
+</div><!-- /app -->
 
 <div id="flash"></div>
 <div id="toast"></div>
 
 <script>
+// ═══════════════════════════════════════
+// COACH LOGIC (original intact)
+// ═══════════════════════════════════════
 let apiKey = localStorage.getItem('gc_key') || '';
 let stream = null, autoOn = false, autoCount = 30, autoInt = null;
 let isAnalyzing = false, voiceOnly = false;
@@ -273,7 +537,6 @@ const vid = document.getElementById('vid');
 const cvs = document.createElement('canvas');
 const c2 = cvs.getContext('2d');
 
-// Init
 window.addEventListener('load', () => {
   if (apiKey) {
     document.getElementById('apiIn').value = apiKey;
@@ -292,7 +555,6 @@ function saveKey() {
   addMsg('ai', 'Clé API enregistrée ✅\n\nMaintenant clique <b>▶ ACTIVER</b> pour partager ton écran !');
 }
 
-// Screen
 async function startScreen() {
   try {
     stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 5, cursor: 'always' }, audio: false });
@@ -332,7 +594,6 @@ function capture() {
   return cvs.toDataURL('image/jpeg', 0.82).split(',')[1];
 }
 
-// Auto
 function toggleAuto() {
   if (!autoOn) {
     autoOn = true; autoCount = 30;
@@ -355,23 +616,19 @@ function stopAuto() {
   document.getElementById('atimer').classList.remove('show');
 }
 
-// Analyze
 async function analyze(userQ = null, doFlash = false) {
   if (isAnalyzing) return;
   if (!apiKey) { showToast('⚠️ Entre ta clé API d\'abord !'); return; }
   isAnalyzing = true;
   setDot('A', 'rec', 'AI BUSY');
   if (doFlash) { flashFx(); }
-
   const frame = capture();
   const question = userQ || 'Analyse ce chart en détail : Volume Profile, biais directionnel, niveaux clés, opportunité de trade.';
   if (userQ) addMsg('usr', userQ);
   showTyp(true);
-
   try {
     const messages = [];
     const systemPrompt = "Tu es un coach de trading expert NQ Futures (Nasdaq) et Gold (XAUUSD), spécialisé Volume Profile, Market Structure, Order Flow, Price Action, scalping ATAS/TradingView. Réponds en français, max 120 mots, clair et actionnable. Structure: 📊 analyse | 🧭 biais 🟢 haussier / 🔴 baissier | 🎯 niveaux | ⚡ action.";
-    
     if (frame) {
       messages.push({ role: 'user', content: [
         { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${frame}` } },
@@ -380,7 +637,6 @@ async function analyze(userQ = null, doFlash = false) {
     } else {
       messages.push({ role: 'user', content: question });
     }
-
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -394,10 +650,8 @@ async function analyze(userQ = null, doFlash = false) {
         messages: [{ role: 'system', content: systemPrompt }, ...messages]
       })
     });
-
     const data = await res.json();
     showTyp(false);
-
     if (data.error) {
       addMsg('ai', `❌ Erreur: ${data.error.message}`);
     } else {
@@ -409,17 +663,14 @@ async function analyze(userQ = null, doFlash = false) {
     showTyp(false);
     addMsg('ai', '❌ Erreur de connexion.');
   }
-
   setDot('A', 'on', 'AI PRÊT');
   isAnalyzing = false;
 }
 
-// Voice input
 function toggleMic() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { showToast('⚠️ Chrome requis pour la voix'); return; }
   if (listening) { recog?.stop(); return; }
-
   recog = new SR();
   recog.lang = 'fr-FR'; recog.continuous = false; recog.interimResults = true;
   recog.onstart = () => { listening = true; micUI(true); setDot('M', 'rec', 'MIC ON'); };
@@ -443,7 +694,6 @@ function micUI(on) {
   document.getElementById('micIco').textContent = on ? '🔴' : '🎙';
 }
 
-// Voice output
 function speak(text) {
   if (!synth) return;
   synth.cancel();
@@ -469,7 +719,6 @@ function sendText() {
 
 function q(txt) { analyze(txt); }
 
-// UI helpers
 function addMsg(role, html) {
   if (voiceOnly && role === 'ai') return;
   const msgs = document.getElementById('msgs');
@@ -490,6 +739,169 @@ function clearChat() { const m = document.getElementById('msgs'), t = document.g
 function setDot(n, type, label) { document.getElementById('d' + n).className = 'dot ' + (type || ''); document.getElementById('l' + n).textContent = label; }
 function flashFx() { const f = document.getElementById('flash'); f.style.opacity = '1'; setTimeout(() => f.style.opacity = '0', 120); }
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+
+// ═══════════════════════════════════════
+// DASHBOARD LOGIC
+// ═══════════════════════════════════════
+let dashOpen = false;
+let nqPrice = 0;
+let tol = 5;
+let lvls = {};
+let whales = [];
+let newsList = [];
+
+// Clock
+setInterval(() => {
+  document.getElementById('dash-clock').textContent = new Date().toLocaleTimeString('fr-FR');
+}, 1000);
+
+function toggleDash() {
+  dashOpen = !dashOpen;
+  document.getElementById('dashPanel').classList.toggle('open', dashOpen);
+  document.getElementById('dashToggle').classList.toggle('on', dashOpen);
+  document.getElementById('hdr-price').style.display = dashOpen ? 'block' : 'none';
+  document.getElementById('hdr-trend').style.display = dashOpen ? 'block' : 'none';
+}
+
+function setPrice() {
+  const v = parseFloat(document.getElementById('price-in').value);
+  if (isNaN(v)) return;
+  nqPrice = v;
+  document.getElementById('hdr-price').textContent = v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('price-in').value = '';
+  saveLevels();
+}
+
+function setSignal() {
+  const dir = document.getElementById('sig-sel').value;
+  const pow = Math.min(100, Math.max(0, parseInt(document.getElementById('sig-pow').value) || 0));
+  const vol = Math.min(100, Math.max(0, parseInt(document.getElementById('vol-in').value) || 0));
+  const block = document.getElementById('sig-block');
+  const dirEl = document.getElementById('sig-dir');
+  const strEl = document.getElementById('sig-str');
+  const pf = document.getElementById('pow-fill');
+  const vf = document.getElementById('vol-fill');
+  const vp = document.getElementById('vol-pct');
+  const th = document.getElementById('hdr-trend');
+  const str = pow >= 80 ? 'TRES FORT' : pow >= 60 ? 'FORT' : pow >= 40 ? 'MODERE' : 'FAIBLE';
+  if (dir === 'bull') {
+    block.className = 'sig-block sig-bull';
+    dirEl.textContent = 'HAUSSIER'; pf.style.background = 'var(--dg)';
+    th.className = 'trend-hdr th-bull'; th.textContent = 'HAUSSIER';
+  } else if (dir === 'bear') {
+    block.className = 'sig-block sig-bear';
+    dirEl.textContent = 'BAISSIER'; pf.style.background = 'var(--dr)';
+    th.className = 'trend-hdr th-bear'; th.textContent = 'BAISSIER';
+  } else {
+    block.className = 'sig-block sig-neut';
+    dirEl.textContent = 'NEUTRE'; pf.style.background = 'var(--dim)';
+    th.className = 'trend-hdr th-neut'; th.textContent = 'NEUTRE';
+  }
+  strEl.textContent = str;
+  pf.style.width = pow + '%';
+  const vc = vol >= 80 ? '#ff4757' : vol >= 50 ? '#ffb300' : '#3d8ef0';
+  const vl = vol >= 80 ? 'EXTREME ⚡' : vol >= 60 ? 'ELEVE' : vol >= 40 ? 'NORMAL' : 'FAIBLE';
+  vf.style.width = vol + '%'; vf.style.background = vc;
+  vp.style.color = vc; vp.textContent = vol + '% ' + vl;
+  if (vol >= 80 && dir !== 'neut') showToast('⚡ VOLUME EXTREME — ' + dirEl.textContent);
+}
+
+function saveLevels() {
+  const map = [
+    ['d1-vah','in-d1-vah'],['d1-val','in-d1-val'],['d1-poc','in-d1-poc'],
+    ['s1-vah','in-s1-vah'],['s1-val','in-s1-val'],['s1-poc','in-s1-poc'],
+    ['m1-vah','in-m1-vah'],['m1-val','in-m1-val'],['m1-poc','in-m1-poc']
+  ];
+  map.forEach(m => {
+    const v = parseFloat(document.getElementById(m[1]).value);
+    if (!isNaN(v) && v > 0) {
+      lvls[m[0]] = v;
+      document.getElementById(m[0]+'-v').textContent = v.toFixed(2);
+    }
+  });
+  checkLevels();
+}
+
+function checkLevels() {
+  if (!nqPrice) return;
+  const keys = ['d1-vah','d1-val','d1-poc','s1-vah','s1-val','s1-poc','m1-vah','m1-val','m1-poc'];
+  let hitAny = false;
+  keys.forEach(k => {
+    const b = document.getElementById(k+'-b');
+    const d = document.getElementById(k+'-d');
+    if (!lvls[k]) { b.className='lvl-b lvl-empty'; if(d) d.textContent='—'; return; }
+    const diff = Math.abs(nqPrice - lvls[k]);
+    if (diff <= tol) {
+      b.className = 'lvl-b lvl-hit'; if(d) d.textContent = 'ATTEINT ✓'; hitAny = true;
+    } else if (nqPrice > lvls[k]) {
+      b.className = 'lvl-b lvl-above'; if(d) d.textContent = '+' + diff.toFixed(0) + 'pts';
+    } else {
+      b.className = 'lvl-b lvl-below'; if(d) d.textContent = '-' + diff.toFixed(0) + 'pts';
+    }
+  });
+  if (hitAny) showToast('🟢 NIVEAU ATTEINT !');
+}
+
+function setDumb() {
+  const v = Math.min(100, Math.max(0, parseInt(document.getElementById('dm-in').value) || 50));
+  const sh = 100 - v;
+  document.getElementById('dm-long').textContent = v + '% Long';
+  document.getElementById('dm-short').textContent = sh + '% Short';
+  document.getElementById('dm-fill').style.width = v + '%';
+  document.getElementById('dm-interp').textContent = v > 65 ? 'Contrarian: BAISSIER' : v < 35 ? 'Contrarian: HAUSSIER' : 'Équilibré';
+  document.getElementById('dm-in').value = '';
+}
+
+function addWhale() {
+  const p = parseFloat(document.getElementById('wh-p').value);
+  const s = parseFloat(document.getElementById('wh-s').value);
+  const side = document.getElementById('wh-side').value;
+  if (isNaN(p) || isNaN(s)) return;
+  const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  whales.unshift({p,s,side,time:now});
+  if (whales.length > 6) whales.pop();
+  const maxS = whales.reduce((m,w) => Math.max(m,w.s), 1);
+  const html = whales.map(w => {
+    const cls = w.side === 'buy' ? 'wh-buy' : 'wh-sell';
+    const arr = w.side === 'buy' ? '▲' : '▼';
+    const bc = w.side === 'buy' ? 'var(--dg)' : 'var(--dr)';
+    const pct = Math.round((w.s/maxS)*100);
+    return `<div class="wh-row"><span class="${cls}">${arr} ${w.p.toFixed(2)}</span><div class="wh-bar-wrap"><div class="wh-bar" style="width:${pct}%;background:${bc}"></div></div><span class="wh-sz">${w.s.toLocaleString()}</span><span class="wh-time">${w.time}</span></div>`;
+  }).join('');
+  document.getElementById('wh-list').innerHTML = html || '<div class="empty-d">Aucun ordre</div>';
+  document.getElementById('wh-p').value = '';
+  document.getElementById('wh-s').value = '';
+}
+
+function addNews() {
+  const h = document.getElementById('nw-h').value || '--:--';
+  const imp = document.getElementById('nw-imp').value;
+  const txt = document.getElementById('nw-txt').value;
+  if (!txt) return;
+  newsList.push({h, imp, txt});
+  const cls = {h:'nw-h',m:'nw-m',l:'nw-l'};
+  const lbl = {h:'HIGH',m:'MED',l:'LOW'};
+  const html = newsList.map(n => `<div class="nw-row"><span class="nw-t">${n.h}</span><span class="${cls[n.imp]}">${lbl[n.imp]}</span><span class="nw-txt">${n.txt}</span></div>`).join('');
+  document.getElementById('nw-list').innerHTML = html;
+  document.getElementById('nw-txt').value = '';
+  document.getElementById('nw-h').value = '';
+}
+
+function addRemind() {
+  const txt = document.getElementById('rm-in').value;
+  if (!txt) return;
+  const div = document.createElement('div');
+  div.className = 'rm-row';
+  div.innerHTML = `<div class="rm-chk" onclick="toggleRm(this)"></div><span>${txt}</span>`;
+  document.getElementById('rm-list').appendChild(div);
+  document.getElementById('rm-in').value = '';
+}
+
+function toggleRm(el) {
+  el.classList.toggle('done');
+  const span = el.nextElementSibling;
+  if (span) span.classList.toggle('rm-done');
+}
 </script>
 </body>
 </html>
